@@ -9,4 +9,7 @@ public:
 
 private:
 	cv::Mat frame;
+
+	template <typename T>
+	cv::Mat pad_image(int& filter_size);
 };
