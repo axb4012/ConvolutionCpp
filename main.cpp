@@ -1,5 +1,6 @@
 #include<iostream>
 #include "opencv2/opencv.hpp"
+#include "preprocessor.h"
 
 
 const int time_limit = 10;
@@ -14,14 +15,20 @@ int main(int argc, char** argv) {
 	cv::VideoCapture cap;
 	if (!cap.open(0))
 		return 0;
-
+	preprocessor preprocess;
 	
 	start = clock();
 
 	cv::namedWindow("Display window", cv::WINDOW_AUTOSIZE);
 	while (runtime < time_limit || keep_running) {
-
 		cap >> frame;
+		preprocess.transfer_to_frame(cap);
+		std::cout << frame.type()<<"\n";
+		std::cout << preprocess.frame.type() << "\n";
+		frame = preprocess.apply_sobel();
+
+		std::cout << int(frame.at<char>(100, 100));
+
 		if (frame.empty()) {
 			std::cout << "Frame was empty\n";
 			break;
