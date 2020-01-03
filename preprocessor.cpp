@@ -5,12 +5,15 @@ preprocessor::preprocessor() {}
 
 void preprocessor::transfer_to_frame(cv::VideoCapture cap) {
 	cap >> frame;
-	height = frame.rows;
-	width = frame.cols;
-	dims = frame.dims;
 
 
 	cv::cvtColor(frame, frame, cv::COLOR_RGB2GRAY);
+	if(to_subsample)
+		cv::resize(frame, frame, cv::Size(), fact, fact);
+
+	height = frame.rows;
+	width = frame.cols;
+	dims = frame.dims;
 	//frame.convertTo(frame, int(CV_8UC1));
 }
 
@@ -38,16 +41,30 @@ cv::Mat preprocessor::convolve_image(cv::Mat filtered_frame, const std::vector<s
 					sum = sum + (int(frame.at<uchar>(k, m)) * filter[k - (i-pad_size)][m - (j-pad_size)]);
 				}
 			}
-			//if(sum<200)
-			//	convolved_img.at<uchar>(i, j) = 0;
-			//else
-			//	convolved_img.at<uchar>(i, j) = 255;
-
-			convolved_img.at<uchar>(i, j) = sum;
+			if (to_binarize) {
+				if(sum<threshold)
+					convolved_img.at<uchar>(i, j) = 0;
+				else
+					convolved_img.at<uchar>(i, j) = 255;
+			}
+			else
+				convolved_img.at<uchar>(i, j) = sum;
 		}
 	}
 
 	return convolved_img;
+}
+
+
+void preprocessor::subsample_img(float sub_fact) {
+	to_subsample = true;
+	fact = sub_fact;
+}
+
+void preprocessor::set_binarize_flag(int thresh) {
+	to_binarize = true;
+	threshold = thresh;
+	std::cout << "Output will be binarized\n";
 }
 
 
