@@ -30,19 +30,20 @@ cv::Mat preprocessor::apply_sobel() {
 cv::Mat preprocessor::convolve_image(cv::Mat filtered_frame, const std::vector<std::vector<int>>& filter) {
 	int sum;
 	cv::Mat convolved_img = filtered_frame;
-	for (int i = pad_size; i < height; i++) {
-		for (int j = pad_size; j < width; j++) {
+	for (int i = pad_size; i < height-1; i++) {
+		for (int j = pad_size; j < width-1; j++) {
 			sum = 0;
-			for (int k = (i - pad_size); k < (i + pad_size); k++) {
-				for (int m = (j - pad_size); m < (j + pad_size); m++) {
+			for (int k = (i - pad_size); k <= (i + pad_size); k++) {
+				for (int m = (j - pad_size); m <= (j + pad_size); m++) {
 					sum = sum + (int(frame.at<uchar>(k, m)) * filter[k - (i-pad_size)][m - (j-pad_size)]);
 				}
 			}
-			if(sum<200)
-				convolved_img.at<uchar>(i, j) = 0;
-			else
-				convolved_img.at<uchar>(i, j) = 255;
+			//if(sum<200)
+			//	convolved_img.at<uchar>(i, j) = 0;
+			//else
+			//	convolved_img.at<uchar>(i, j) = 255;
 
+			convolved_img.at<uchar>(i, j) = sum;
 		}
 	}
 
