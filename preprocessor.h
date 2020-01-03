@@ -16,5 +16,5 @@ private:
 	int pad_size = 0;
 	//template <typename T>
 	cv::Mat pad_image(const int& filter_size);
-	void convolve_image(cv::Mat& frame, const std::vector<std::vector<int>>& filter);
+	cv::Mat convolve_image(cv::Mat frame, const std::vector<std::vector<int>>& filter);
 };
