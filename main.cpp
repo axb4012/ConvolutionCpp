@@ -5,6 +5,12 @@
 
 const int time_limit = 10;
 
+const bool to_binarize = false;
+const int binarize_threshold = 90;
+
+const bool to_subsample = false;
+const int subsample_fact = 1;
+
 int main(int argc, char** argv) {
 	int runtime = 0;
 	cv::Mat frame;
@@ -15,16 +21,19 @@ int main(int argc, char** argv) {
 	if (!cap.open(0))
 		return 0;
 	preprocessor preprocess;
-	preprocess.set_binarize_flag(90);
-	preprocess.subsample_img(0.5);
+
+	if(to_binarize)
+		preprocess.set_binarize_flag(binarize_threshold);
+	if(to_subsample)
+		preprocess.subsample_img(subsample_fact);
 	
 	start = clock();
 
 	cv::namedWindow("Display window", cv::WINDOW_AUTOSIZE);
 	while (runtime < time_limit || keep_running) {
-		//cap >> frame;
+		
 		preprocess.transfer_to_frame(cap);
-		frame = preprocess.apply_sobel();
+		frame = preprocess.apply_sobel(true);
 
 		if (frame.empty()) {
 			std::cout << "Frame was empty\n";
