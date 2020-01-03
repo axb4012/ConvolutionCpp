@@ -15,6 +15,8 @@ int main(int argc, char** argv) {
 	if (!cap.open(0))
 		return 0;
 	preprocessor preprocess;
+	preprocess.set_binarize_flag(90);
+	preprocess.subsample_img(0.5);
 	
 	start = clock();
 
