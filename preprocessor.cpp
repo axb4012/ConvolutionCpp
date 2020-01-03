@@ -1,12 +1,26 @@
 #include "preprocessor.h"
 #include<vector>
 
-preprocessor::preprocessor() {}
+preprocessor::preprocessor() {
+	cv::Mat kern1 = cv::Mat::ones(filter_size, filter_size, CV_32F)/9;
+	cv::Mat kern2 = cv::Mat::ones(filter_size, filter_size, CV_32F)/9;
+
+	cv_filterx.create(filter_size, filter_size, CV_64FC1);
+	cv_filtery.create(filter_size, filter_size, CV_64FC1);
+	//cv_filterx = kern1;
+	//cv_filtery = kern2;
+
+	
+	for (int i = 0; i < filter_size; i++) {
+		for (int j = 0; j < filter_size; j++) {
+			cv_filterx.at<double>(i, j) = filterx[i][j];
+			cv_filtery.at<double>(i, j) = filtery[i][j];
+		}
+	}
+}
 
 void preprocessor::transfer_to_frame(cv::VideoCapture cap) {
 	cap >> frame;
-
-
 	cv::cvtColor(frame, frame, cv::COLOR_RGB2GRAY);
 	if(to_subsample)
 		cv::resize(frame, frame, cv::Size(), fact, fact);
@@ -17,11 +31,11 @@ void preprocessor::transfer_to_frame(cv::VideoCapture cap) {
 	//frame.convertTo(frame, int(CV_8UC1));
 }
 
-cv::Mat preprocessor::apply_sobel() {
+cv::Mat preprocessor::apply_sobel(bool use_opencv) {
+	if (use_opencv)
+		return opencv_convolve_image();
+
 	cv::Mat filtered_frame;
-	std::vector<std::vector<int>> filterx{ {-1, 0, 1}, {-2, 0, 2}, {-1, 0, 1} };
-	std::vector<std::vector<int>> filtery{ {1, 2, 1}, {0, 0, 0}, {-1, -2, -1} };
-	int filter_size = filtery.size();
 
 	filtered_frame = pad_image(filter_size);
 	filtered_frame = convolve_image(filtered_frame, filterx);
@@ -70,9 +84,7 @@ void preprocessor::set_binarize_flag(int thresh) {
 
 //template <typename T>
 cv::Mat preprocessor::pad_image(const int& filter_size) {
-	//std::cout << "\nFilter size is " << filter_size << "\n";
 	pad_size = filter_size / 2;
-	//std::cout << "\nPad size is " << pad_size << "\n";
 
 	int padx, pady = pad_size;
 
@@ -89,4 +101,16 @@ cv::Mat preprocessor::pad_image(const int& filter_size) {
 	}
 
 	return padded_image;
+}
+
+cv::Mat preprocessor::opencv_convolve_image() {
+	cv::Mat cv_filtered_img;
+
+	filter2D(frame, cv_filtered_img, -1, cv_filterx);
+	filter2D(cv_filtered_img, cv_filtered_img, -1, cv_filtery);
+	if (to_binarize)
+		cv::threshold(cv_filtered_img, cv_filtered_img, threshold, 255, cv::THRESH_BINARY);
+	
+
+	return cv_filtered_img;
 }
