@@ -6,11 +6,10 @@
 const int time_limit = 10;
 
 int main(int argc, char** argv) {
-	int start_time, runtime = 0;
-	clock_t start, end;
+	int runtime = 0;
 	cv::Mat frame;
+	clock_t start, end;
 	char keypress;
-	cv::Mat test(500, 500, 19);
 	bool keep_running = false;
 	cv::VideoCapture cap;
 	if (!cap.open(0))
@@ -21,13 +20,9 @@ int main(int argc, char** argv) {
 
 	cv::namedWindow("Display window", cv::WINDOW_AUTOSIZE);
 	while (runtime < time_limit || keep_running) {
-		cap >> frame;
+		//cap >> frame;
 		preprocess.transfer_to_frame(cap);
-		std::cout << frame.type()<<"\n";
-		std::cout << preprocess.frame.type() << "\n";
 		frame = preprocess.apply_sobel();
-
-		std::cout << int(frame.at<char>(100, 100));
 
 		if (frame.empty()) {
 			std::cout << "Frame was empty\n";
@@ -35,7 +30,7 @@ int main(int argc, char** argv) {
 		}
 
 		cv::imshow("Display window", frame);
-		keypress = (char)cv::waitKey(25);
+		keypress = (char)cv::waitKey(10);
 		if (keypress == 27) {
 			break;
 		}
